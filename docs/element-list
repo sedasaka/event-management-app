@@ -1,0 +1,6 @@
+com.streamcheck.eventmanagementsystem
+com.streamcheck.eventmanagementsystem.controller
+com.streamcheck.eventmanagementsystem.exception
+com.streamcheck.eventmanagementsystem.model
+com.streamcheck.eventmanagementsystem.repository
+com.streamcheck.eventmanagementsystem.service
