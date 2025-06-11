@@ -53,53 +53,31 @@ Das gilt besonders für StatefulWidgets (also Widgets mit veränderbarem Zustand
 **Für `StatefulWidget`s (vereinfacht):**
 
 
-### 1. `createState()`
-- Wird **einmal** aufgerufen, wenn das Widget **gebaut wird**.
-- Es erstellt das **State-Objekt**, wo sich der "Zustand" befindet.
-
- Beispiel aus `AuthForm`:
-```dart
-@override
-State<AuthForm> createState() => _AuthFormState();
-```
+* **`createState()`**
+- Wird einmal aufgerufen, wenn das Widget gebaut wird.
 
 * **`initState()`**:
     * Wird genau einmal aufgerufen, wenn das `State`-Objekt erstellt wird (nach `createState()`).
-    * Hier werden Initialisierungen durchgeführt, wie das Abrufen von Daten.
-    * Man kann `setState()` hier nicht aufrufen, weila das Widget noch nicht richtig aufgebaut ist.
-    * `super.initState()` muss immer zuerst aufgerufen werden.
-
-* **`didChangeDependencies()`**:
-    * Wird direkt nach `initState()` aufgerufen und auch, wenn sich die Abhängigkeiten des Widgets ändern (z.B. wenn sich ein `InheritedWidget` ändert, von dem dieses Widget abhängt).
- 
+   
 
 * **`build()`**:
     * Wird jedes Mal aufgerufen, wenn sich der Zustand des Widgets ändert, die Abhängigkeiten aktualisiert werden oder ein `setState()` aufgerufen wird.
-    * Gibt den Widget-Tree zurück, der von diesem Widget gerendert werden soll.
-    * Sollte keine Seiteneffekte haben und rein sein (nur Widgets zurückgeben).
-    * Die am häufigsten aufgerufene Methode.
+    * am häufigsten aufgerufen.
 
 * **`didUpdateWidget(covariant T oldWidget)`**:
-    * Wird aufgerufen, wenn das übergeordnete Widget das Widget neu aufbaut und ihm ein *neues* Widget des *gleichen `runtimeType`* mit einem *anderen Schlüssel* (oder gar keinem Schlüssel) übergibt.
-    * Ermöglicht es, auf Änderungen der übergebenen `widget`-Properties zu reagieren.
-    * `super.didUpdateWidget(oldWidget)` muss zuerst aufgerufen werden.
+    * Wird aufgerufen, wenn das Eltern-Widget das Widget neu aufbaut
 
 * **`setState()`**:
-    * Eine Methode der `State`-Klasse (nicht des Widgets selbst).
+
     * Wird manuell aufgerufen, um den Zustand des Widgets zu ändern und Flutter anzuweisen, die `build()`-Methode erneut aufzurufen, um die UI zu aktualisieren.
 
-* **`deactivate()`**:
-    * Wird aufgerufen, wenn das `State`-Objekt aus dem Widget-Tree entfernt wird.
-    * Kann kurzfristig sein (z.B. wenn das Widget in eine andere Position verschoben wird) oder dauerhaft (z.B. wenn es aus dem Tree entfernt wird).
-    * Wenn das Widget wieder in den Tree eingefügt wird, wird `activate()` aufgerufen.
 
 * **`dispose()`**:
-    * Wird dauerhaft aufgerufen, wenn das `State`-Objekt aus dem Widget-Tree entfernt wird und **nie wieder verwendet wird**.
-    * Hier sollten alle Ressourcen freigegeben werden (Controller, Listener, Timer), um Memory Leaks zu vermeiden.
-    * `super.dispose()` muss immer am Ende aufgerufen werden.
+    * Wird dauerhaft aufgerufen, wenn das `State`-Objekt nie wieder verwendet wird.
+
 
 **Für `StatelessWidget`s**:
-Sie haben nur eine `build()`-Methode. Da sie keinen veränderbaren Zustand haben, gibt es keine  `setState()` oder `dispose()` Methoden. Sie werden einfach neu aufgebaut, wenn sich ihr übergeordnetes Widget sie neu aufbaut.
+Sie haben nur eine `build()`-Methode. Da sie keinen veränderbaren Zustand haben, gibt es keine  `setState()` oder `dispose()` Methoden. Sie werden einfach neu aufgebaut, wenn sich ihr Eltern-Widget sie neu aufbaut.
 
 ### 2. Was sind die Vorteile von `StatelessWidget` vs `StatefulWidget`?
 
@@ -107,26 +85,24 @@ Die Wahl zwischen `StatelessWidget` und `StatefulWidget` hängt davon ab, ob ein
 
 **StatelessWidget Vorteile:**
 
-* **Einfacher und leichter**: Sie haben keinen internen Zustand, der verwaltet werden muss, was den Code einfacher und leichter zu lesen macht.
-* **Bessere Performance (potenziell)**: Da sie sich nicht ändern, müssen sie seltener neu aufgebaut werden als `StatefulWidget`s, was die Render-Performance verbessern kann, insbesondere bei großen Widget-Trees.
-* **Weniger Overhead**: Kein `State`-Objekt, keine `initState`, `dispose` usw., was weniger Speicherplatz und CPU-Zyklen bedeutet.
-* **Immutabilität**: Sie sind unveränderlich
+* Einfach und schnell, 
+* kein veränderbaren Zustatnd,
+* ideal für UI-Elements, die nicht verändert werden
+
 
 **StatefulWidget Vorteile:**
 
-* **Interner, veränderbarer Zustand**: Sie können ihren eigenen Zustand über die Zeit ändern, was für interaktive UI-Elemente wie Formularfelder, Checkboxen oder komplexere Datenanzeigen unerlässlich ist.
-* **Reaktion auf Benutzerinteraktionen**: Sie können auf Benutzer-Inputs (z.B. Button-Klicks, Texteingaben) reagieren und ihre UI entsprechend aktualisieren.
-* **Lebenszyklusmethoden**: Zugang zu Methoden wie `initState()` und `dispose()`, die für das Setup und die Bereinigung von Ressourcen wichtig sind.
+* **Interner, veränderbarer Zustand**:  Zustand kann in der Zeit ändern,  für UI-Elemente wie Formularfelder, dropdowmenus,  Checkboxen geeignet und notwendig für interaktive Nutzungserlebnis.
 
-**Wann man was verwendet:**
-* Verwende **`StatelessWidget`**, wenn sich die inhalte oder properties des Widgets nie ändern, nachdem es erstellt wurde (z.B. `Text`, `Icon`, `Image`, `AppBar`). Wenn ein Widget nur Daten anzeigt oder andere Widgets zusammensetzt, ohne selbst interaktiv zu sein, ist `StatelessWidget` die richtige Wahl.
+* Verwende **`StatelessWidget`**, wenn sich die inhalte oder properties des Widgets nie ändern, nachdem es erstellt wurde (z.B. `Text`, `Icon`, `Image`, `AppBar`). 
+
 * Verwende **`StatefulWidget`**, wenn sich das Widget im Laufe der Zeit ändern muss, basierend auf Benutzerinteraktionen, externen Datenänderungen oder Timern (z.B. `Checkbox`, `TextField`, `Slider`). Wenn du `setState()` aufrufen musst, um die UI zu aktualisieren, brauchst du ein `StatefulWidget`.
 
 ### 3. Welche State Management Libraries verwendest du/würdest du verwenden und warum?
 
 Die Wahl der State Management Library hängt oft von der Komplexität des Projekts, der Team-Erfahrung und persönlichen Präferenzen ab.
 
-**Ich würde hauptsächlich die folgenden State Management Libraries verwenden und warum:**
+* Ich würde hauptsächlich die folgenden State Management Libraries verwenden und warum:
 
 * **Provider (Derzeit präferiert und auch in diesem Projekt genutzt)**:
     * **Warum**: `Provider` ist ein Wrapper um `InheritedWidget`. Es ist einfach zu erlernen, flexibel und deckt die meisten State Management-Anforderungen ab.
@@ -137,21 +113,38 @@ Die Wahl der State Management Library hängt oft von der Komplexität des Projek
     * **Anwendung in diesem Projekt**: Ich habe in diesem Projekt bereits `setState` verwendet, aber `Provider` wäre der nächste logische Schritt, um den State des eingeloggten Benutzers (z.B. `userId`, `role`) oder die globale Event-Liste zu verwalten, damit nicht jeder Screen die Daten neu laden muss.
 
 * **Bloc / Cubit (Für komplexere Anwendungen)**:
-    * **Warum**: Für sehr große und komplexe Anwendungen, bei denen eine strikte Trennung von Geschäftslogik und UI, sowie eine detaillierte Kontrolle über den State-Fluss erforderlich sind. Cubit ist eine einfachere Variante von Bloc.
-    * **Vorteile**:
-        * **Striktes Muster**: Erzwingt ein klares, testbares und vorhersagbares Architekturmuster (Events -> Bloc/Cubit -> States).
-        * **Skalierbarkeit**: Ideal für große Teams und Enterprise-Anwendungen, da es die Wartbarkeit und Erweiterbarkeit stark verbessert.
-        * **Testbarkeit**: Ausgezeichnete Testbarkeit der Geschäftslogik, da sie von der UI entkoppelt ist.
-        * **Debuggen**: Macht das Debuggen einfacher, da der State-Fluss klar definiert ist.
-    * **Anwendung in diesem Projekt**: Wenn das Projekt wachsen und viele komplexe Interaktionen oder Offline-Funktionen umfassen würde, wäre Bloc/Cubit eine starke Wahl.
+    * **Warum**: Für sehr große und komplexe Anwendungen
 
 * **Riverpod (Modernere Alternative zu Provider)**:
-    * **Warum**: Eine Weiterentwicklung von Provider, die die Probleme von Provider löst (z.B. die Notwendigkeit von `BuildContext` für den Zugriff auf Provider, und die Möglichkeit von Programmierfehlern bei der globalen Zugänglichkeit).
-    * **Vorteile**:
-        * **Compile-Time Safety**: Bietet bessere Kompilierzeit-Fehlererkennung.
-        * **Kein `BuildContext` für den Zugriff**: Kann Provider von überall aus aufrufen, ohne den `BuildContext` zu benötigen.
-        * **Bessere Testbarkeit**: Noch einfacher zu testen als Provider.
-        * **Starke Typisierung**: Mehr Sicherheit durch verbesserte Typinferenz.
-    * **Anwendung in diesem Projekt**: Eine ausgezeichnete Wahl für neue Projekte, da es die Vorteile von Provider bietet und dessen Schwachstellen behebt.
+    * **Warum**: Eine Weiterentwicklung von `Provider`
 
-**Zusammenfassend würde ich für dieses Projekt mit seinen aktuellen Anforderungen bei `setState` für lokale UI-States bleiben und `Provider` für globale Zustände (wie Benutzerinformationen nach dem Login) implementieren. Für zukünftiges Wachstum würde ich `Riverpod` oder `Bloc/Cubit` in Betracht ziehen.**
+- Zusammenfassend würde ich für dieses Projekt mit seinen aktuellen Anforderungen bei `setState` für lokale UI-States bleiben und `Provider` für globale Zustände (wie Benutzerinformationen nach dem Login) implementieren. Für zukünftige, komplexre PRojekte und in diesem app für weitere Wachstum würde ich `Riverpod` oder `Bloc/Cubit` in Betracht ziehen, wenn ich bespielsweise dashboards in komplexeren kontext für participants und organizers seperat erstellen würde, wie interessierte oder gespeicherte events.
+
+
+
+## Allgemein
+
+### 1. Wie würdest du die Performance deiner App messen?
+
+Die Performance einer Flutter-App kann auf verschiedene Weisen gemessen werden, um Engpässe zu identifizieren und zu optimieren:
+
+* **Laut Recherchen** 
+
+* **Flutter DevTools**:
+    * **Performance Overlay**: überwacht FPS
+    * **CPU Profiler**: Analysiert die CPU
+    * **Memory Tab**: Überwacht die Speichernutzung
+
+* **IDE-Integration (z.B. VS Code, Android Studio)**:
+    * Die IDEs bieten oft direkte Links zu den Flutter DevTools und zeigen grundlegende Performance-Indikatoren wie CPU-Auslastung an.
+
+* **`flutter analyze` und `flutter doctor`**:
+
+### 2. Wie würdest du das Testing der App verbessern, wenn du mehr Zeit investieren würdest?
+
+Wenn ich mehr Zeit für das Testing der App investieren würde, würde ich
+- mehr Unit tests für Logik in backend schreiben `mockito` nutzen, um HTTP-Requests und Responses realistik testen können. 
+- the widgets einzelne teste, ob alles in sich richtig läuft. screenings und ausfüllung von feldern (leergelassen, unzulässige charakters, Time-Date-Formatting usw.)
+- navigationen testen, mit tätigen von buttons zu richtiger seite gelanden?
+- fehlermeldungen richtig funktioniert
+- testen ob die screens richtig in anderen geräten mit verschieden opsystems, Größen und Richtungen haben, kompatable or not 
